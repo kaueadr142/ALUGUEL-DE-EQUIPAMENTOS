@@ -1,0 +1,1167 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Aluguel de Equipamentos de TI</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #12121a;
+            --bg-card: #1a1a24;
+            --text-primary: #f5f5f7;
+            --text-secondary: #a1a1aa;
+            --accent: #6366f1;
+            --accent-hover: #818cf8;
+            --success: #22c55e;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --border: #27272a;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+
+        /* Navbar */
+        .navbar {
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .navbar h1 {
+            font-size: 1.5rem;
+            background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .nav-links button {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .nav-links button:hover,
+        .nav-links button.active {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: var(--text-primary);
+        }
+
+        /* Container */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Page Header */
+        .page-header {
+            margin-bottom: 2rem;
+        }
+
+        .page-header h2 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .page-header p {
+            color: var(--text-secondary);
+        }
+
+        /* Cards */
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .card:hover {
+            box-shadow: 0 0 30px rgba(99, 102, 241, 0.1);
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, var(--bg-card), var(--bg-secondary));
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+        }
+
+        .stat-card h3 {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-card .value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--accent);
+        }
+
+        /* Forms */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 1rem;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-hover);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #16a34a;
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+        }
+
+        .btn-outline:hover {
+            background: var(--bg-secondary);
+        }
+
+        .btn-sm {
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+        }
+
+        /* Equipment Grid */
+        .equipment-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1rem;
+        }
+
+        .equipment-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: all 0.3s;
+        }
+
+        .equipment-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 30px rgba(99, 102, 241, 0.15);
+        }
+
+        .equipment-card h3 {
+            margin-bottom: 0.5rem;
+        }
+
+        .equipment-card .category {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            background: var(--accent);
+            color: white;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .equipment-card .details {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            margin-bottom: 1rem;
+        }
+
+        .equipment-card .price {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--accent);
+            margin-bottom: 1rem;
+        }
+
+        .equipment-card .price span {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            font-weight: normal;
+        }
+
+        .equipment-card .status {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+        }
+
+        .status-available {
+            background: rgba(34, 197, 94, 0.2);
+            color: var(--success);
+        }
+
+        .status-rented {
+            background: rgba(245, 158, 11, 0.2);
+            color: var(--warning);
+        }
+
+        .equipment-card .actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        /* Rental List */
+        .rental-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .rental-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+        }
+
+        .rental-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+
+        .rental-header h3 {
+            margin-bottom: 0.25rem;
+        }
+
+        .rental-header .date {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+
+        .rental-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .rental-info-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+        }
+
+        .rental-info-item .icon {
+            width: 40px;
+            height: 40px;
+            background: rgba(99, 102, 241, 0.2);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent);
+        }
+
+        .rental-info-item .label {
+            color: var(--text-secondary);
+            font-size: 0.75rem;
+        }
+
+        .rental-info-item .value {
+            font-weight: 500;
+        }
+
+        .rental-status {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+        }
+
+        .rental-status.active {
+            background: rgba(99, 102, 241, 0.2);
+            color: var(--accent);
+        }
+
+        .rental-status.completed {
+            background: rgba(34, 197, 94, 0.2);
+            color: var(--success);
+        }
+
+        .rental-status.cancelled {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--danger);
+        }
+
+        /* Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 2rem;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal h3 {
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+            justify-content: flex-end;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--text-secondary);
+        }
+
+        .empty-state svg {
+            width: 64px;
+            height: 64px;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        /* Toast */
+        .toast-container {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            z-index: 2000;
+        }
+
+        .toast {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1rem 1.5rem;
+            margin-top: 0.5rem;
+            animation: slideIn 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .toast.success {
+            border-left: 4px solid var(--success);
+        }
+
+        .toast.error {
+            border-left: 4px solid var(--danger);
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .navbar {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .nav-links {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .container {
+                padding: 1rem;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <h1>🖥️ TI Rental System</h1>
+        <div class="nav-links">
+            <button onclick="showPage('dashboard')" class="active" data-page="dashboard">Dashboard</button>
+            <button onclick="showPage('equipments')" data-page="equipments">Equipamentos</button>
+            <button onclick="showPage('rentals')" data-page="rentals">Aluguéis</button>
+            <button onclick="showPage('history')" data-page="history">Histórico</button>
+        </div>
+    </nav>
+
+    <div class="container">
+        <!-- Dashboard Page -->
+        <div id="dashboard" class="page active">
+            <div class="page-header">
+                <h2>Dashboard</h2>
+                <p>Visão geral do sistema de aluguel</p>
+            </div>
+
+            <div class="stats-grid" id="stats-grid">
+                <!-- Stats will be inserted here -->
+            </div>
+
+            <div class="card">
+                <h3 style="margin-bottom: 1rem;">Aluguéis Ativos</h3>
+                <div id="active-rentals-dashboard">
+                    <!-- Active rentals will be inserted here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Equipments Page -->
+        <div id="equipments" class="page">
+            <div class="page-header">
+                <h2>Equipamentos</h2>
+                <p>Gerencie o catálogo de equipamentos</p>
+            </div>
+
+            <div class="card" style="margin-bottom: 2rem;">
+                <h3 style="margin-bottom: 1rem;">Cadastrar Novo Equipamento</h3>
+                <form id="equipment-form">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Nome do Equipamento *</label>
+                            <input type="text" id="eq-name" required maxlength="100">
+                        </div>
+                        <div class="form-group">
+                            <label>Categoria *</label>
+                            <select id="eq-category" required>
+                                <option value="">Selecione...</option>
+                                <option value="Computador">Computador</option>
+                                <option value="Servidor">Servidor</option>
+                                <option value="Notebook">Notebook</option>
+                                <option value="Monitor">Monitor</option>
+                                <option value="Impressora">Impressora</option>
+                                <option value="Rede">Equipamento de Rede</option>
+                                <option value="Outro">Outro</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Valor Diário (R$) *</label>
+                            <input type="number" id="eq-daily-rate" min="0" step="0.01" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Número de Série</label>
+                            <input type="text" id="eq-serial" maxlength="50">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Descrição</label>
+                        <textarea id="eq-description" rows="3" maxlength="500"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Cadastrar Equipamento</button>
+                </form>
+            </div>
+
+            <h3 style="margin-bottom: 1rem;">Equipamentos Cadastrados</h3>
+            <div class="equipment-grid" id="equipment-grid">
+                <!-- Equipment cards will be inserted here -->
+            </div>
+        </div>
+
+        <!-- Rentals Page -->
+        <div id="rentals" class="page">
+            <div class="page-header">
+                <h2>Aluguéis</h2>
+                <p>Registre novos aluguéis</p>
+            </div>
+
+            <div class="card" style="margin-bottom: 2rem;">
+                <h3 style="margin-bottom: 1rem;">Novo Aluguel</h3>
+                <form id="rental-form">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Equipamento *</label>
+                            <select id="rental-equipment" required>
+                                <option value="">Selecione um equipamento...</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Valor Diário (R$)</label>
+                            <input type="number" id="rental-daily-rate" readonly>
+                        </div>
+                    </div>
+
+                    <h4 style="margin: 1.5rem 0 1rem; color: var(--text-secondary);">Dados do Cliente</h4>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Nome do Cliente *</label>
+                            <input type="text" id="rental-client-name" required maxlength="100">
+                        </div>
+                        <div class="form-group">
+                            <label>E-mail *</label>
+                            <input type="email" id="rental-client-email" required maxlength="255">
+                        </div>
+                        <div class="form-group">
+                            <label>Telefone *</label>
+                            <input type="tel" id="rental-client-phone" required maxlength="20">
+                        </div>
+                    </div>
+
+                    <h4 style="margin: 1.5rem 0 1rem; color: var(--text-secondary);">Período do Aluguel</h4>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Data de Início *</label>
+                            <input type="date" id="rental-start-date" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Data de Término *</label>
+                            <input type="date" id="rental-end-date" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Total de Dias</label>
+                            <input type="number" id="rental-total-days" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label>Valor Total (R$)</label>
+                            <input type="text" id="rental-total-value" readonly style="font-size: 1.25rem; font-weight: bold; color: var(--accent);">
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-success" style="margin-top: 1rem;">Confirmar Aluguel</button>
+                </form>
+            </div>
+
+            <h3 style="margin-bottom: 1rem;">Aluguéis Ativos</h3>
+            <div class="rental-list" id="active-rentals">
+                <!-- Active rentals will be inserted here -->
+            </div>
+        </div>
+
+        <!-- History Page -->
+        <div id="history" class="page">
+            <div class="page-header">
+                <h2>Histórico</h2>
+                <p>Todos os aluguéis registrados no sistema</p>
+            </div>
+
+            <div class="rental-list" id="history-list">
+                <!-- Rental history will be inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <script>
+        // Data Storage
+        const STORAGE_KEYS = {
+            EQUIPMENTS: 'ti_rental_equipments',
+            RENTALS: 'ti_rental_rentals'
+        };
+
+        // Get data from localStorage
+        function getEquipments() {
+            const data = localStorage.getItem(STORAGE_KEYS.EQUIPMENTS);
+            return data ? JSON.parse(data) : [];
+        }
+
+        function getRentals() {
+            const data = localStorage.getItem(STORAGE_KEYS.RENTALS);
+            return data ? JSON.parse(data) : [];
+        }
+
+        // Save data to localStorage
+        function saveEquipments(equipments) {
+            localStorage.setItem(STORAGE_KEYS.EQUIPMENTS, JSON.stringify(equipments));
+        }
+
+        function saveRentals(rentals) {
+            localStorage.setItem(STORAGE_KEYS.RENTALS, JSON.stringify(rentals));
+        }
+
+        // Generate unique ID
+        function generateId() {
+            return Date.now().toString(36) + Math.random().toString(36).substr(2);
+        }
+
+        // Show toast notification
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.textContent = message;
+            container.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        // Page Navigation
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+            document.querySelectorAll('.nav-links button').forEach(btn => btn.classList.remove('active'));
+            
+            document.getElementById(pageId).classList.add('active');
+            document.querySelector(`[data-page="${pageId}"]`).classList.add('active');
+            
+            // Refresh data when page changes
+            if (pageId === 'dashboard') renderDashboard();
+            if (pageId === 'equipments') renderEquipments();
+            if (pageId === 'rentals') {
+                renderEquipmentSelect();
+                renderActiveRentals();
+            }
+            if (pageId === 'history') renderHistory();
+        }
+
+        // Dashboard
+        function renderDashboard() {
+            const equipments = getEquipments();
+            const rentals = getRentals();
+            const activeRentals = rentals.filter(r => r.status === 'active');
+            const totalRevenue = rentals.filter(r => r.status === 'completed').reduce((sum, r) => sum + r.totalValue, 0);
+            const availableEquipments = equipments.filter(e => e.status === 'available').length;
+
+            document.getElementById('stats-grid').innerHTML = `
+                <div class="stat-card">
+                    <h3>Total de Equipamentos</h3>
+                    <div class="value">${equipments.length}</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Equipamentos Disponíveis</h3>
+                    <div class="value">${availableEquipments}</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Aluguéis Ativos</h3>
+                    <div class="value">${activeRentals.length}</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Receita Total</h3>
+                    <div class="value">R$ ${totalRevenue.toFixed(2)}</div>
+                </div>
+            `;
+
+            const activeRentalsHtml = activeRentals.length > 0 
+                ? activeRentals.map(rental => `
+                    <div class="rental-card" style="margin-bottom: 1rem;">
+                        <div class="rental-header">
+                            <div>
+                                <h3>${sanitizeHTML(rental.equipmentName)}</h3>
+                                <div class="date">Cliente: ${sanitizeHTML(rental.clientName)}</div>
+                            </div>
+                            <span class="rental-status active">Ativo</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span>Término: ${new Date(rental.endDate).toLocaleDateString('pt-BR')}</span>
+                            <span style="font-weight: bold; color: var(--accent);">R$ ${rental.totalValue.toFixed(2)}</span>
+                        </div>
+                    </div>
+                `).join('')
+                : '<div class="empty-state"><p>Nenhum aluguel ativo no momento.</p></div>';
+
+            document.getElementById('active-rentals-dashboard').innerHTML = activeRentalsHtml;
+        }
+
+        // Equipments
+        function renderEquipments() {
+            const equipments = getEquipments();
+            
+            if (equipments.length === 0) {
+                document.getElementById('equipment-grid').innerHTML = `
+                    <div class="empty-state" style="grid-column: 1 / -1;">
+                        <p>Nenhum equipamento cadastrado ainda.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            document.getElementById('equipment-grid').innerHTML = equipments.map(eq => `
+                <div class="equipment-card">
+                    <span class="category">${sanitizeHTML(eq.category)}</span>
+                    <h3>${sanitizeHTML(eq.name)}</h3>
+                    <div class="details">
+                        ${eq.serialNumber ? `<p>Série: ${sanitizeHTML(eq.serialNumber)}</p>` : ''}
+                        ${eq.description ? `<p>${sanitizeHTML(eq.description)}</p>` : ''}
+                    </div>
+                    <div class="price">R$ ${eq.dailyRate.toFixed(2)} <span>/dia</span></div>
+                    <span class="status ${eq.status === 'available' ? 'status-available' : 'status-rented'}">
+                        ${eq.status === 'available' ? 'Disponível' : 'Alugado'}
+                    </span>
+                    <div class="actions">
+                        <button class="btn btn-danger btn-sm" onclick="deleteEquipment('${eq.id}')" ${eq.status === 'rented' ? 'disabled' : ''}>
+                            Excluir
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Add Equipment
+        document.getElementById('equipment-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const name = document.getElementById('eq-name').value.trim();
+            const category = document.getElementById('eq-category').value;
+            const dailyRate = parseFloat(document.getElementById('eq-daily-rate').value);
+            const serialNumber = document.getElementById('eq-serial').value.trim();
+            const description = document.getElementById('eq-description').value.trim();
+
+            if (!name || !category || isNaN(dailyRate) || dailyRate < 0) {
+                showToast('Preencha todos os campos obrigatórios corretamente.', 'error');
+                return;
+            }
+
+            const equipment = {
+                id: generateId(),
+                name,
+                category,
+                dailyRate,
+                serialNumber,
+                description,
+                status: 'available',
+                createdAt: new Date().toISOString()
+            };
+
+            const equipments = getEquipments();
+            equipments.push(equipment);
+            saveEquipments(equipments);
+
+            this.reset();
+            renderEquipments();
+            showToast('Equipamento cadastrado com sucesso!');
+        });
+
+        // Delete Equipment
+        function deleteEquipment(id) {
+            if (!confirm('Tem certeza que deseja excluir este equipamento?')) return;
+            
+            const equipments = getEquipments().filter(eq => eq.id !== id);
+            saveEquipments(equipments);
+            renderEquipments();
+            showToast('Equipamento excluído com sucesso!');
+        }
+
+        // Rentals
+        function renderEquipmentSelect() {
+            const equipments = getEquipments().filter(eq => eq.status === 'available');
+            const select = document.getElementById('rental-equipment');
+            
+            select.innerHTML = '<option value="">Selecione um equipamento...</option>' +
+                equipments.map(eq => `
+                    <option value="${eq.id}" data-rate="${eq.dailyRate}">${sanitizeHTML(eq.name)} - R$ ${eq.dailyRate.toFixed(2)}/dia</option>
+                `).join('');
+        }
+
+        // Equipment selection change
+        document.getElementById('rental-equipment').addEventListener('change', function() {
+            const selectedOption = this.options[this.selectedIndex];
+            const rate = selectedOption.dataset.rate || 0;
+            document.getElementById('rental-daily-rate').value = parseFloat(rate).toFixed(2);
+            calculateTotal();
+        });
+
+        // Date change handlers
+        document.getElementById('rental-start-date').addEventListener('change', calculateTotal);
+        document.getElementById('rental-end-date').addEventListener('change', calculateTotal);
+
+        function calculateTotal() {
+            const startDate = document.getElementById('rental-start-date').value;
+            const endDate = document.getElementById('rental-end-date').value;
+            const dailyRate = parseFloat(document.getElementById('rental-daily-rate').value) || 0;
+
+            if (startDate && endDate) {
+                const start = new Date(startDate);
+                const end = new Date(endDate);
+                const days = Math.max(1, Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1);
+                const total = days * dailyRate;
+
+                document.getElementById('rental-total-days').value = days;
+                document.getElementById('rental-total-value').value = `R$ ${total.toFixed(2)}`;
+            }
+        }
+
+        // Submit Rental
+        document.getElementById('rental-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const equipmentId = document.getElementById('rental-equipment').value;
+            const clientName = document.getElementById('rental-client-name').value.trim();
+            const clientEmail = document.getElementById('rental-client-email').value.trim();
+            const clientPhone = document.getElementById('rental-client-phone').value.trim();
+            const startDate = document.getElementById('rental-start-date').value;
+            const endDate = document.getElementById('rental-end-date').value;
+            const dailyRate = parseFloat(document.getElementById('rental-daily-rate').value);
+            const totalDays = parseInt(document.getElementById('rental-total-days').value);
+
+            // Validation
+            if (!equipmentId || !clientName || !clientEmail || !clientPhone || !startDate || !endDate) {
+                showToast('Preencha todos os campos obrigatórios.', 'error');
+                return;
+            }
+
+            // Email validation
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(clientEmail)) {
+                showToast('E-mail inválido.', 'error');
+                return;
+            }
+
+            if (new Date(endDate) < new Date(startDate)) {
+                showToast('A data de término deve ser posterior à data de início.', 'error');
+                return;
+            }
+
+            const equipments = getEquipments();
+            const equipment = equipments.find(eq => eq.id === equipmentId);
+
+            if (!equipment || equipment.status !== 'available') {
+                showToast('Equipamento não disponível.', 'error');
+                return;
+            }
+
+            const rental = {
+                id: generateId(),
+                equipmentId,
+                equipmentName: equipment.name,
+                clientName,
+                clientEmail,
+                clientPhone,
+                startDate,
+                endDate,
+                dailyRate,
+                totalDays,
+                totalValue: dailyRate * totalDays,
+                status: 'active',
+                createdAt: new Date().toISOString()
+            };
+
+            // Update equipment status
+            equipment.status = 'rented';
+            saveEquipments(equipments);
+
+            // Save rental
+            const rentals = getRentals();
+            rentals.push(rental);
+            saveRentals(rentals);
+
+            this.reset();
+            document.getElementById('rental-daily-rate').value = '';
+            document.getElementById('rental-total-days').value = '';
+            document.getElementById('rental-total-value').value = '';
+            
+            renderEquipmentSelect();
+            renderActiveRentals();
+            showToast('Aluguel registrado com sucesso!');
+        });
+
+        function renderActiveRentals() {
+            const rentals = getRentals().filter(r => r.status === 'active');
+            
+            if (rentals.length === 0) {
+                document.getElementById('active-rentals').innerHTML = `
+                    <div class="empty-state">
+                        <p>Nenhum aluguel ativo no momento.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            document.getElementById('active-rentals').innerHTML = rentals.map(rental => `
+                <div class="rental-card">
+                    <div class="rental-header">
+                        <div>
+                            <h3>${sanitizeHTML(rental.equipmentName)}</h3>
+                            <div class="date">Registrado em ${new Date(rental.createdAt).toLocaleDateString('pt-BR')}</div>
+                        </div>
+                        <span class="rental-status active">Ativo</span>
+                    </div>
+                    <div class="rental-info">
+                        <div class="rental-info-item">
+                            <div class="icon">👤</div>
+                            <div>
+                                <div class="label">Cliente</div>
+                                <div class="value">${sanitizeHTML(rental.clientName)}</div>
+                                <div style="font-size: 0.75rem; color: var(--text-secondary);">${sanitizeHTML(rental.clientEmail)}</div>
+                            </div>
+                        </div>
+                        <div class="rental-info-item">
+                            <div class="icon">📅</div>
+                            <div>
+                                <div class="label">Período</div>
+                                <div class="value">${new Date(rental.startDate).toLocaleDateString('pt-BR')} - ${new Date(rental.endDate).toLocaleDateString('pt-BR')}</div>
+                                <div style="font-size: 0.75rem; color: var(--text-secondary);">${rental.totalDays} dias</div>
+                            </div>
+                        </div>
+                        <div class="rental-info-item">
+                            <div class="icon">💰</div>
+                            <div>
+                                <div class="label">Valor Total</div>
+                                <div class="value" style="color: var(--accent); font-size: 1.25rem;">R$ ${rental.totalValue.toFixed(2)}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="margin-top: 1rem; display: flex; gap: 0.5rem;">
+                        <button class="btn btn-success btn-sm" onclick="completeRental('${rental.id}')">Finalizar</button>
+                        <button class="btn btn-danger btn-sm" onclick="cancelRental('${rental.id}')">Cancelar</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Complete Rental
+        function completeRental(rentalId) {
+            if (!confirm('Deseja finalizar este aluguel?')) return;
+
+            const rentals = getRentals();
+            const rental = rentals.find(r => r.id === rentalId);
+            
+            if (rental) {
+                rental.status = 'completed';
+                rental.completedAt = new Date().toISOString();
+                saveRentals(rentals);
+
+                // Free up equipment
+                const equipments = getEquipments();
+                const equipment = equipments.find(eq => eq.id === rental.equipmentId);
+                if (equipment) {
+                    equipment.status = 'available';
+                    saveEquipments(equipments);
+                }
+
+                renderEquipmentSelect();
+                renderActiveRentals();
+                showToast('Aluguel finalizado com sucesso!');
+            }
+        }
+
+        // Cancel Rental
+        function cancelRental(rentalId) {
+            if (!confirm('Deseja cancelar este aluguel?')) return;
+
+            const rentals = getRentals();
+            const rental = rentals.find(r => r.id === rentalId);
+            
+            if (rental) {
+                rental.status = 'cancelled';
+                rental.cancelledAt = new Date().toISOString();
+                saveRentals(rentals);
+
+                // Free up equipment
+                const equipments = getEquipments();
+                const equipment = equipments.find(eq => eq.id === rental.equipmentId);
+                if (equipment) {
+                    equipment.status = 'available';
+                    saveEquipments(equipments);
+                }
+
+                renderEquipmentSelect();
+                renderActiveRentals();
+                showToast('Aluguel cancelado.');
+            }
+        }
+
+        // History
+        function renderHistory() {
+            const rentals = getRentals().sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+            
+            if (rentals.length === 0) {
+                document.getElementById('history-list').innerHTML = `
+                    <div class="empty-state">
+                        <p>Nenhum aluguel registrado ainda.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const statusLabels = {
+                active: 'Ativo',
+                completed: 'Concluído',
+                cancelled: 'Cancelado'
+            };
+
+            document.getElementById('history-list').innerHTML = rentals.map(rental => `
+                <div class="rental-card">
+                    <div class="rental-header">
+                        <div>
+                            <h3>${sanitizeHTML(rental.equipmentName)}</h3>
+                            <div class="date">Registrado em ${new Date(rental.createdAt).toLocaleDateString('pt-BR')} às ${new Date(rental.createdAt).toLocaleTimeString('pt-BR')}</div>
+                        </div>
+                        <span class="rental-status ${rental.status}">${statusLabels[rental.status]}</span>
+                    </div>
+                    <div class="rental-info">
+                        <div class="rental-info-item">
+                            <div class="icon">👤</div>
+                            <div>
+                                <div class="label">Cliente</div>
+                                <div class="value">${sanitizeHTML(rental.clientName)}</div>
+                                <div style="font-size: 0.75rem; color: var(--text-secondary);">${sanitizeHTML(rental.clientEmail)}</div>
+                                <div style="font-size: 0.75rem; color: var(--text-secondary);">${sanitizeHTML(rental.clientPhone)}</div>
+                            </div>
+                        </div>
+                        <div class="rental-info-item">
+                            <div class="icon">📅</div>
+                            <div>
+                                <div class="label">Período</div>
+                                <div class="value">${new Date(rental.startDate).toLocaleDateString('pt-BR')}</div>
+                                <div style="font-size: 0.75rem;">até ${new Date(rental.endDate).toLocaleDateString('pt-BR')}</div>
+                                <div style="font-size: 0.75rem; color: var(--text-secondary);">${rental.totalDays} dias</div>
+                            </div>
+                        </div>
+                        <div class="rental-info-item">
+                            <div class="icon">💰</div>
+                            <div>
+                                <div class="label">Valores</div>
+                                <div style="font-size: 0.75rem;">R$ ${rental.dailyRate.toFixed(2)}/dia</div>
+                                <div class="value" style="color: var(--accent); font-size: 1.5rem;">R$ ${rental.totalValue.toFixed(2)}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Sanitize HTML to prevent XSS
+        function sanitizeHTML(str) {
+            if (!str) return '';
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            renderDashboard();
+            
+            // Set min date for rental dates
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('rental-start-date').min = today;
+            document.getElementById('rental-end-date').min = today;
+        });
+    </script>
+</body>
+</html>
